@@ -1,0 +1,10 @@
+App(
+    appid="autostart_test",
+    name="Autostart Test",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="autostart_test_app",
+    sources=["autostart_test.c"],
+    fap_category="Misc",
+    fap_icon="A_Plugin_Icon",
+    stack_size=1024,
+)

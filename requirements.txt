@@ -1,0 +1,24 @@
+# Python requirements for Flipper Zero development
+# These are typically included with the unleashed-firmware repository
+
+# SCons build system
+scons>=4.0.0
+
+# Protobuf for firmware communication
+protobuf>=3.20.0
+
+# Pillow for image processing
+Pillow>=9.0.0
+
+# PySerial for device communication
+pyserial>=3.5
+
+# Heatshrink compression
+heatshrink2>=0.11.0
+
+# ANSI color support
+ansicolors>=1.1.8
+
+# Development tools
+black>=22.0.0
+isort>=5.10.0
