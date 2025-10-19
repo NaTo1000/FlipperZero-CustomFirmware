@@ -20,6 +20,13 @@ This repository contains custom firmware modifications and applications for the 
 FlipperZero-CustomFirmware/
 ├── applications_user/          # Custom user applications
 │   └── autostart_test/        # Example auto-start application
+├── database/                  # Signal databases and captures
+│   ├── NFC/                  # NFC card captures
+│   ├── Sub-GHz/              # Sub-GHz RF captures
+│   ├── infrared/             # Infrared remote databases
+│   ├── ibutton/              # iButton key captures
+│   ├── BadUSB/               # BadUSB scripts
+│   └── ...                   # Additional resources
 ├── firmware_patches/          # Firmware modifications
 ├── build_configs/            # Build configuration files
 ├── docs/                     # Documentation
@@ -80,6 +87,35 @@ pip install -r requirements.txt
    ```bash
    ./fbt flash
    ```
+
+## Database Files
+
+This repository includes an extensive collection of database files from the [FlipperZeroDB](https://github.com/curiousqeorqe/FlipperZeroDB) community project:
+
+### Available Databases
+
+- **NFC Captures**: MIFARE Classic, Ultralight, and various NFC card types
+- **Sub-GHz Signals**: RF captures for garage doors, gates, remotes, and more
+- **Infrared**: Remote control databases for TVs, ACs, and other devices
+- **iButton**: Dallas key captures and examples
+- **BadUSB**: Educational USB payload scripts
+- **Assets**: Protocol dictionaries and libraries
+
+### Usage
+
+Copy database files to your Flipper Zero's SD card:
+
+```bash
+# Example: Copy NFC files to SD card
+cp -r database/NFC/* /path/to/flipper/sd/nfc/
+
+# Example: Copy Sub-GHz files
+cp -r database/Sub-GHz/* /path/to/flipper/sd/subghz/
+```
+
+See [database/README.md](database/README.md) for detailed information, file formats, and legal disclaimers.
+
+⚠️ **Important**: Use these files responsibly and only on systems you own or have permission to test.
 
 ## Custom Applications
 
