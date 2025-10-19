@@ -1,8 +1,8 @@
 # Sample FBT options configuration for custom firmware
 # Copy this to your unleashed-firmware directory as fbt_options.py
 
-from pathlib import Path
 import posixpath
+from pathlib import Path
 
 # Firmware origin identifier
 FIRMWARE_ORIGIN = "NaTo1000-Custom"
@@ -41,7 +41,7 @@ FIRMWARE_APPS = {
     "minimal": [
         # Minimal set for testing
         "basic_services",
-        "updater_app", 
+        "updater_app",
         "archive",
     ],
 }
