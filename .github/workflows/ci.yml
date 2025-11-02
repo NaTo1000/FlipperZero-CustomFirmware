@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  lint-python:
+    name: Python Linting
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run black formatter check
+        run: |
+          black --check --diff build_configs/
+
+      - name: Run isort import check
+        run: |
+          isort --check-only --diff build_configs/
+
+  validate-requirements:
+    name: Validate Requirements
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Validate requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt --dry-run || pip install -r requirements.txt
+
+      - name: Check for security vulnerabilities
+        run: |
+          pip install safety
+          safety check --file requirements.txt || true
+
+  validate-structure:
+    name: Validate Project Structure
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check required files
+        run: |
+          echo "Checking required files..."
+          test -f requirements.txt && echo "✓ requirements.txt exists"
+          test -f README.md && echo "✓ README.md exists"
+          test -f startup.sh && echo "✓ startup.sh exists"
+          test -d applications_user && echo "✓ applications_user directory exists"
+          test -d build_configs && echo "✓ build_configs directory exists"
+
+      - name: Validate startup.sh is executable
+        run: |
+          if [ -f startup.sh ]; then
+            if [ -x startup.sh ]; then
+              echo "✓ startup.sh is executable"
+            else
+              echo "⚠ startup.sh exists but is not executable"
+              exit 1
+            fi
+          fi
