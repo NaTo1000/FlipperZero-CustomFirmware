@@ -73,10 +73,10 @@ test: ## Run tests with pytest
 security: ## Run security checks (pip-audit, bandit)
 	@echo "Running security scans..."
 	@echo "→ pip-audit..."
-	pip-audit --requirement requirements.txt || true
+	@pip-audit --requirement requirements.txt || echo "⚠ Security vulnerabilities found - review output above"
 	@echo "→ bandit..."
-	bandit -r $(BUILD_DIR)/ || true
-	@echo "✓ Security scan complete"
+	@bandit -r $(BUILD_DIR)/ || echo "⚠ Security issues found - review output above"
+	@echo "✓ Security scan complete (check for warnings above)"
 
 check: ## Run all checks (lint, test, security)
 	@echo "Running all checks..."
