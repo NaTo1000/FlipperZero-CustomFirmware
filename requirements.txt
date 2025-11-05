@@ -45,7 +45,7 @@ mypy==1.13.0
 # ==========================================
 
 # pip-audit for vulnerability scanning
-pip-audit==2.7.3
+pip-audit==2.9.0
 
 # Safety for checking known security vulnerabilities (alternative)
 safety==3.2.10
