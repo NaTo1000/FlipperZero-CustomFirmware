@@ -1,24 +1,71 @@
 # Python requirements for Flipper Zero development
-# These are typically included with the unleashed-firmware repository
+# Pinned versions for reproducible builds
+# Last updated: 2025-11-05
 
-# SCons build system
-scons>=4.0.0
+# ==========================================
+# Core Build Dependencies
+# ==========================================
 
-# Protobuf for firmware communication
-protobuf>=3.20.0
+# SCons build system - used by FBT (Flipper Build Tool)
+scons==4.8.1
 
-# Pillow for image processing
-Pillow>=9.0.0
+# Protobuf for firmware communication protocol
+protobuf==5.28.3
 
-# PySerial for device communication
-pyserial>=3.5
+# Pillow for image processing (icons, graphics)
+Pillow==11.0.0
 
-# Heatshrink compression
-heatshrink2>=0.11.0
+# PySerial for device communication over USB
+pyserial==3.5
 
-# ANSI color support
-ansicolors>=1.1.8
+# Heatshrink compression library for assets
+heatshrink2==0.13.0
 
-# Development tools
-black>=22.0.0
-isort>=5.10.0
+# ANSI color support for terminal output
+ansicolors==1.1.8
+
+# ==========================================
+# Code Quality & Formatting Tools
+# ==========================================
+
+# Black code formatter
+black==24.10.0
+
+# Import sorting tool
+isort==5.13.2
+
+# Flake8 linter for code quality
+flake8==7.1.1
+
+# Type checking with mypy
+mypy==1.13.0
+
+# ==========================================
+# Security & Dependency Management
+# ==========================================
+
+# pip-audit for vulnerability scanning
+pip-audit==2.7.3
+
+# Safety for checking known security vulnerabilities (alternative)
+safety==3.2.10
+
+# ==========================================
+# Development Tools
+# ==========================================
+
+# Pre-commit hooks framework
+pre-commit==4.0.1
+
+# PyYAML for configuration file handling
+PyYAML==6.0.2
+
+# ==========================================
+# Testing (if needed)
+# ==========================================
+
+# pytest for unit testing
+pytest==8.3.3
+
+# pytest-cov for coverage reporting
+pytest-cov==6.0.0
