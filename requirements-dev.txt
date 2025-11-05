@@ -1,0 +1,57 @@
+# Development requirements - extends requirements.txt
+# Install with: pip install -r requirements.txt -r requirements-dev.txt
+
+# Include base requirements
+-r requirements.txt
+
+# ==========================================
+# Additional Development Tools
+# ==========================================
+
+# IPython for interactive development
+ipython==8.29.0
+
+# Rich for beautiful terminal output
+rich==13.9.4
+
+# Invoke for task automation
+invoke==2.2.0
+
+# Watchdog for file system monitoring
+watchdog==6.0.0
+
+# ==========================================
+# Documentation Tools
+# ==========================================
+
+# Sphinx for documentation generation
+sphinx==8.1.3
+
+# Sphinx theme
+sphinx-rtd-theme==3.0.2
+
+# Markdown support for Sphinx
+myst-parser==4.0.0
+
+# ==========================================
+# Additional Linting & Analysis
+# ==========================================
+
+# Pylint for additional code analysis
+pylint==3.3.2
+
+# Bandit for security linting
+bandit==1.8.0
+
+# Radon for code complexity metrics
+radon==6.0.1
+
+# ==========================================
+# Git Hooks & Automation
+# ==========================================
+
+# Commitizen for conventional commits
+commitizen==4.1.0
+
+# GitPython for Git operations
+GitPython==3.1.43

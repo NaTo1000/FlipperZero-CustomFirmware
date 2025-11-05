@@ -1,0 +1,8 @@
+# Bandit security scanning configuration
+[bandit]
+exclude_dirs = ['/tests', '/.venv', '/venv', '/__pycache__']
+
+# Use default test suite (all security checks)
+# To customize, specify tests explicitly as a list
+# Example: tests = ['B201', 'B301', 'B302']
+skips = []
