@@ -2,6 +2,14 @@
 
 Custom firmware development project for Flipper Zero with auto-start capabilities and enhanced functionality.
 
+## 📚 Documentation
+
+- **[Quick Start Guide](docs/QUICK_START.md)** - Get started in minutes!
+- **[Help & Troubleshooting](HELP.md)** - Solutions to common issues
+- **[FAQ](docs/FAQ.md)** - Frequently asked questions
+- **[Application Development](docs/APPLICATION_DEVELOPMENT.md)** - Create custom apps
+- **[Contributing](CONTRIBUTING.md)** - Contribution guidelines
+
 ## Overview
 
 This repository contains custom firmware modifications and applications for the Flipper Zero device, built on top of the Unleashed firmware. Features include automatic application launching on boot, custom applications, and enhanced system functionality.
@@ -127,6 +135,8 @@ Configure build options in `fbt_options.py`:
 
 ## Troubleshooting
 
+For detailed troubleshooting information, see **[HELP.md](HELP.md)**.
+
 ### Common Issues
 
 - **Build failures**: Check toolchain installation
@@ -142,8 +152,17 @@ Enable serial debugging to monitor application behavior:
 screen /dev/ttyACM0 115200
 ```
 
+### Need More Help?
+
+- 📖 [Comprehensive Troubleshooting Guide](HELP.md)
+- ❓ [Frequently Asked Questions](docs/FAQ.md)
+- 💬 [Open an Issue](https://github.com/NaTo1000/FlipperZero-CustomFirmware/issues/new/choose)
+
 ## Contributing
 
+We welcome contributions! Please see **[CONTRIBUTING.md](CONTRIBUTING.md)** for detailed guidelines.
+
+Quick summary:
 1. Fork this repository
 2. Create a feature branch
 3. Make your changes
