@@ -1,0 +1,14 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://github.com/NaTo1000/FlipperZero-CustomFirmware/blob/main/README.md
+    about: Read the project documentation and guides
+  - name: Troubleshooting Guide
+    url: https://github.com/NaTo1000/FlipperZero-CustomFirmware/blob/main/HELP.md
+    about: Common issues and their solutions
+  - name: FAQ
+    url: https://github.com/NaTo1000/FlipperZero-CustomFirmware/blob/main/docs/FAQ.md
+    about: Frequently asked questions
+  - name: Flipper Zero Discord
+    url: https://flipperzero.one/discord
+    about: Join the community for general Flipper Zero discussions

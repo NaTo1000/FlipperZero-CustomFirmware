@@ -1,0 +1,106 @@
+name: Help / Question
+description: Get help or ask a question
+title: "[Help]: "
+labels: ["question", "help-wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Need help? We're here for you! Before submitting:
+        
+        - Check [HELP.md](../HELP.md) - Common issues and solutions
+        - Check [FAQ](../docs/FAQ.md) - Frequently asked questions
+        - Search existing issues and discussions
+        
+        If you still need help, fill out this form!
+
+  - type: textarea
+    id: question
+    attributes:
+      label: What do you need help with?
+      description: Clearly describe your question or issue
+      placeholder: I'm trying to... but I'm having trouble with...
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried?
+      description: Let us know what you've already attempted
+      placeholder: |
+        1. I tried...
+        2. I also attempted...
+        3. I checked...
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      placeholder: e.g., Ubuntu 22.04, macOS 14.0
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python Version
+      placeholder: e.g., Python 3.11.2
+    validations:
+      required: false
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Help Category
+      description: What area do you need help with?
+      options:
+        - Initial Setup
+        - Building Firmware
+        - Flashing to Device
+        - Application Development
+        - Auto-Start Configuration
+        - Debugging
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Error Messages (if any)
+      description: Paste any error messages you're seeing
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: files
+    attributes:
+      label: Relevant Files
+      description: Share relevant configuration or code (application.fam, fbt_options.py, etc.)
+      render: python
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other information that might help us help you
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I've checked the HELP.md troubleshooting guide
+          required: true
+        - label: I've checked the FAQ
+          required: true
+        - label: I've searched for similar questions
+          required: true
