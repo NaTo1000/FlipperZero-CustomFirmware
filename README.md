@@ -1,5 +1,9 @@
 # FlipperZero Custom Firmware Development
 
+[![CI](https://github.com/NaTo1000/FlipperZero-CustomFirmware/actions/workflows/ci.yml/badge.svg)](https://github.com/NaTo1000/FlipperZero-CustomFirmware/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+
 Custom firmware development project for Flipper Zero with auto-start capabilities and enhanced functionality.
 
 ## 📚 Documentation
@@ -14,6 +18,13 @@ Custom firmware development project for Flipper Zero with auto-start capabilitie
 
 This repository contains custom firmware modifications and applications for the Flipper Zero device, built on top of the Unleashed firmware. Features include automatic application launching on boot, custom applications, and enhanced system functionality.
 
+## Quick Links
+
+- **[Development Setup Guide](DEVELOPMENT.md)** - Complete guide for setting up your development environment
+- **[CI/CD Pipeline](https://github.com/NaTo1000/FlipperZero-CustomFirmware/actions)** - View workflow runs and reports
+- **[Requirements](requirements.txt)** - Production dependencies
+- **[Dev Requirements](requirements-dev.txt)** - Development tools
+
 ## Features
 
 - **Auto-Start Applications**: Automatic application launching on device boot
@@ -21,6 +32,8 @@ This repository contains custom firmware modifications and applications for the 
 - **Enhanced System Integration**: Deep integration with Flipper Zero hardware
 - **Modular Architecture**: Easy to extend and customize
 - **Build System Integration**: Seamless integration with FBT build system
+- **CI/CD Pipeline**: Automated testing, linting, and security scanning
+- **Pre-commit Hooks**: Code quality checks before commits
 
 ## Project Structure
 
@@ -28,10 +41,15 @@ This repository contains custom firmware modifications and applications for the 
 FlipperZero-CustomFirmware/
 ├── applications_user/          # Custom user applications
 │   └── autostart_test/        # Example auto-start application
-├── firmware_patches/          # Firmware modifications
-├── build_configs/            # Build configuration files
-├── docs/                     # Documentation
-└── tools/                    # Development tools
+├── build_configs/             # Build configuration files
+│   └── fbt_options.py        # FBT configuration
+├── .github/workflows/         # CI/CD workflows
+├── requirements.txt           # Production dependencies
+├── requirements-dev.txt       # Development dependencies
+├── pyproject.toml            # Project configuration
+├── Makefile                  # Development task automation
+├── DEVELOPMENT.md            # Development setup guide
+└── README.md                 # This file
 ```
 
 ## Prerequisites
@@ -39,12 +57,14 @@ FlipperZero-CustomFirmware/
 - **Operating System**: Linux, macOS, or WSL on Windows
 - **Dependencies**:
   - Git
-  - Python 3.8+
+  - Python 3.11+ (3.12 recommended)
   - ARM GCC toolchain
   - FBT (Flipper Build Tool)
   - USB access for device flashing
 
-### Installation (macOS)
+See **[DEVELOPMENT.md](DEVELOPMENT.md)** for detailed setup instructions.
+
+### Quick Setup (macOS)
 
 ```bash
 # Install Homebrew dependencies
@@ -54,10 +74,77 @@ brew install git python cmake ninja dfu-util ccache
 git clone https://github.com/NaTo1000/FlipperZero-CustomFirmware.git
 cd FlipperZero-CustomFirmware
 
-# Set up Python environment
-python3 -m venv .venv
+# Set up development environment (one command!)
+make setup
 source .venv/bin/activate
+```
+
+### Quick Setup (Linux/Ubuntu)
+
+```bash
+# Install system dependencies
+sudo apt update
+sudo apt install -y git python3 python3-pip python3-venv build-essential
+
+# Clone and setup
+git clone https://github.com/NaTo1000/FlipperZero-CustomFirmware.git
+cd FlipperZero-CustomFirmware
+make setup
+source .venv/bin/activate
+```
+
+## Development Workflow
+
+This project includes a comprehensive development workflow with automated quality checks:
+
+### Using Makefile (Recommended)
+
+```bash
+# Set up environment
+make setup
+
+# Format code
+make format
+
+# Run linters
+make lint
+
+# Run security scans
+make security
+
+# Run all checks
+make check
+
+# Install pre-commit hooks
+make pre-commit
+
+# Clean build artifacts
+make clean
+
+# Show all available commands
+make help
+```
+
+### Manual Commands
+
+```bash
+# Activate virtual environment
+source .venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Format code
+black build_configs/
+isort build_configs/
+
+# Lint code
+flake8 build_configs/
+mypy build_configs/
+
+# Security scan
+pip-audit
+bandit -r build_configs/
 ```
 
 ## Quick Start

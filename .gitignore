@@ -19,6 +19,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
 
 # IDE files
 .vscode/
@@ -26,6 +29,8 @@ venv.bak/
 *.swp
 *.swo
 .clangd/
+*.sublime-project
+*.sublime-workspace
 
 # OS generated files
 .DS_Store
@@ -57,3 +62,29 @@ config.local.*
 
 # Documentation build
 docs/_build/
+docs/_static/
+docs/_templates/
+
+# Coverage and test reports
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+.hypothesis/
+coverage.xml
+*.cover
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Security scan reports
+pip-audit-report.json
+bandit-report.json
+safety-report.json
+
+# Dependency tree
+dependency-tree.txt
+
+# Pre-commit
+.pre-commit-cache/
