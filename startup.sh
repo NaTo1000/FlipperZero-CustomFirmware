@@ -1,6 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Startup script for FlipperZero Custom Firmware Development
-# This script sets up the development environment
+# Supports: Linux, macOS, and WSL on Windows
+#
+# Cross-platform quick-start:
+#   Linux / macOS / WSL:  bash startup.sh
+#   Windows (native):     Use install.bat or: python install.py
+#
+# For DFU recovery flashing instructions: python install.py --dfu
 
 set -e  # Exit on error
 
@@ -107,6 +113,20 @@ else
     echo -e "${YELLOW}  git submodule update --init --recursive${NC}"
 fi
 
+# Check for dfu-util (needed for DFU flashing)
+print_info "Checking for dfu-util..."
+if command -v dfu-util &> /dev/null; then
+    DFU_VERSION=$(dfu-util --version 2>&1 | head -1)
+    print_success "dfu-util found: $DFU_VERSION"
+else
+    print_warning "dfu-util not found (needed for DFU recovery flashing)"
+    case "$(uname -s)" in
+        Darwin)  echo -e "${YELLOW}  Install: brew install dfu-util${NC}" ;;
+        Linux)   echo -e "${YELLOW}  Install: sudo apt install dfu-util${NC}" ;;
+        *)       echo -e "${YELLOW}  Download: https://dfu-util.sourceforge.net/${NC}" ;;
+    esac
+fi
+
 # Display setup information
 echo ""
 echo -e "${GREEN}================================================${NC}"
@@ -123,5 +143,14 @@ echo -e "  3. Copy build configuration:"
 echo -e "     ${BLUE}cp build_configs/fbt_options.py ../unleashed-firmware/${NC}"
 echo -e "  4. Build firmware:"
 echo -e "     ${BLUE}cd ../unleashed-firmware && ./fbt${NC}"
+echo -e "  5. Flash firmware via USB:"
+echo -e "     ${BLUE}./fbt flash_usb${NC}"
+echo ""
+echo -e "  Build HackRF Companion as .fap only (no reflash):"
+echo -e "     ${BLUE}./fbt fap_hackrf_companion${NC}"
+echo ""
+echo -e "  DFU recovery instructions:"
+echo -e "     ${BLUE}python install.py --dfu${NC}"
+echo "     or see: ${BLUE}docs/DFU_FLASHING.md${NC}"
 echo ""
 print_success "Development environment is ready!"

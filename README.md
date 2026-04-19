@@ -5,6 +5,7 @@ Custom firmware development project for Flipper Zero with auto-start capabilitie
 ## 📚 Documentation
 
 - **[Quick Start Guide](docs/QUICK_START.md)** - Get started in minutes!
+- **[DFU Flashing Guide](docs/DFU_FLASHING.md)** - Full install, recovery & .fap deployment
 - **[Help & Troubleshooting](HELP.md)** - Solutions to common issues
 - **[FAQ](docs/FAQ.md)** - Frequently asked questions
 - **[Application Development](docs/APPLICATION_DEVELOPMENT.md)** - Create custom apps
@@ -17,6 +18,7 @@ This repository contains custom firmware modifications and applications for the 
 ## Features
 
 - **Auto-Start Applications**: Automatic application launching on device boot
+- **HackRF Companion**: SDR-inspired RF control panel with live CC1101 metrics, spectrum scanner, RSSI monitor, and settings panel
 - **Custom Applications**: Purpose-built applications for specific use cases
 - **Enhanced System Integration**: Deep integration with Flipper Zero hardware
 - **Modular Architecture**: Easy to extend and customize
@@ -50,6 +52,22 @@ FlipperZero-CustomFirmware/
   - ARM GCC toolchain
   - FBT (Flipper Build Tool)
   - USB access for device flashing
+
+### Installation (All Platforms)
+
+```bash
+# Linux / macOS / WSL
+bash startup.sh
+
+# Windows (CMD)
+install.bat
+
+# Cross-platform (Python, all OS)
+python install.py
+
+# DFU recovery instructions
+python install.py --dfu
+```
 
 ### Installation (macOS)
 
@@ -93,8 +111,16 @@ pip install -r requirements.txt
 
 5. **Flash to device**:
    ```bash
-   ./fbt flash
+   ./fbt flash_usb
    ```
+
+6. **Or build just the HackRF Companion .fap** (no full reflash):
+   ```bash
+   ./fbt fap_hackrf_companion
+   ./fbt launch_app APPSRC=applications_user/hackrf_companion
+   ```
+
+See [docs/DFU_FLASHING.md](docs/DFU_FLASHING.md) for DFU recovery and manual flash options.
 
 ## Database Files
 
@@ -126,6 +152,31 @@ See [database/README.md](database/README.md) for detailed information, file form
 ⚠️ **Important**: Use these files responsibly and only on systems you own or have permission to test.
 
 ## Custom Applications
+
+### HackRF Companion
+
+SDR-inspired RF control panel inspired by the HackRF One tool suite (`hackrf-2026.01.3`).
+Accesses the on-board CC1101 Sub-GHz radio for real-world metrics.
+
+**Four views (navigate with ← / →):**
+
+| View | Description |
+|------|-------------|
+| Dashboard | Live RSSI bar, current frequency, modulation, signal detection |
+| Scanner | 28-column spectrum sweep across selected ISM band |
+| Monitor | Scrolling RSSI history graph |
+| Settings | Frequency preset, modulation, scan band selection |
+
+See [applications_user/hackrf_companion/README.md](applications_user/hackrf_companion/README.md)
+for full feature documentation.
+
+**Quick build (as .fap, no full reflash needed):**
+
+```bash
+cd ../unleashed-firmware
+./fbt fap_hackrf_companion
+./fbt launch_app APPSRC=applications_user/hackrf_companion
+```
 
 ### Auto-Start Test Application
 

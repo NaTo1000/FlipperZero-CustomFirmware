@@ -1,0 +1,14 @@
+App(
+    appid="hackrf_companion",
+    name="HackRF Companion",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="hackrf_companion_app",
+    sources=["hackrf_companion.c"],
+    fap_category="Sub-GHz",
+    fap_icon="A_Plugin_Icon",
+    stack_size=2048,
+    fap_description="SDR-inspired RF control panel with live CC1101 metrics",
+    fap_author="NaTo1000",
+    fap_version="1.0",
+    fap_weburl="https://github.com/NaTo1000/FlipperZero-CustomFirmware",
+)
