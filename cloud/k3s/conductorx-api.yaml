@@ -1,0 +1,119 @@
+# K3s Deployment — ConductorX API
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conductorx-api
+  namespace: dolfi
+  labels:
+    app: conductorx-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: conductorx-api
+  template:
+    metadata:
+      labels:
+        app: conductorx-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/nato1000/flipperzero-customfirmware/conductorx-api:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DOLFI_ENV
+              value: "prod"
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: dolfi-secrets
+                  key: postgres-host
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: dolfi-secrets
+                  key: postgres-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dolfi-secrets
+                  key: postgres-password
+            - name: VAULT_ADDR
+              valueFrom:
+                secretKeyRef:
+                  name: dolfi-secrets
+                  key: vault-addr
+            - name: VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: dolfi-secrets
+                  key: vault-token
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: conductorx-api
+  namespace: dolfi
+spec:
+  selector:
+    app: conductorx-api
+  ports:
+    - port: 80
+      targetPort: 8000
+  type: ClusterIP
+
+---
+# Horizontal Pod Autoscaler (PEC supplement)
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: conductorx-api-hpa
+  namespace: dolfi
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: conductorx-api
+  minReplicas: 1
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dolfi
