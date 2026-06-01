@@ -154,7 +154,7 @@ async def device_info() -> dict:
     result = await _conductor.device_info()
     _ledger.append("conductor", "device_info", {"success": result.success})
     if not result.success:
-        raise HTTPException(status_code=503, detail=result.error)
+        raise HTTPException(status_code=503, detail="Device communication error.")
     return {"output": result.output, "success": result.success}
 
 
@@ -206,10 +206,13 @@ async def proof_code(body: dict) -> dict:
     code = body.get("code", "")
     language = body.get("language", "python")
     result = _code.proof_python(code) if language == "python" else _code.proof_c(code)
+    # Sanitize issues — never expose raw internal exception tracebacks to clients
+    safe_issues = [str(issue)[:256] for issue in result.issues]
+    safe_suggestions = [str(s)[:256] for s in result.suggestions]
     return {
         "is_safe": result.is_safe,
-        "issues": result.issues,
-        "suggestions": result.suggestions,
+        "issues": safe_issues,
+        "suggestions": safe_suggestions,
         "rewritten": result.rewritten,
     }
 
