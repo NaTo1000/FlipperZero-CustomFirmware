@@ -41,7 +41,9 @@ class CodeAgent:
         try:
             ast.parse(code)
         except SyntaxError as exc:
-            result.issues.append(f"SyntaxError: {exc}")
+            # Use only safe, non-traceback fields from SyntaxError
+            safe_msg = f"SyntaxError at line {exc.lineno}: {exc.msg}"
+            result.issues.append(safe_msg)
             result.is_safe = False
             return result
 
