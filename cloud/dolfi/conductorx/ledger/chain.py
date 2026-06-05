@@ -8,21 +8,20 @@ Every agent action is recorded as a row with:
 
 This creates a cryptographically verifiable chain — tampering with
 any historical row breaks the hash chain and is detectable.
+
+Additionally, each row is assigned a sequential index and the ledger
+can build a Merkle tree over all row hashes.  The Merkle root provides
+O(log n) membership proofs and an independent tamper-detection path
+that complements the linear hash chain.
 """
 from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-from cryptography.hazmat.primitives.serialization import (
-    Encoding,
-    PublicFormat,
-    PrivateFormat,
-    NoEncryption,
-)
 
 GENESIS_HASH = "0" * 64  # Sentinel hash for the first row
 
@@ -36,6 +35,24 @@ def _canonical(row: dict[str, Any]) -> str:
     return json.dumps(row, sort_keys=True, separators=(",", ":"), default=str)
 
 
+def _build_merkle_root(leaves: list[str]) -> str:
+    """
+    Build a Merkle root from a list of hex-encoded leaf hashes.
+
+    The tree is built bottom-up.  If a layer has an odd number of nodes the
+    last node is duplicated before hashing the pair (Bitcoin-compatible padding).
+    """
+    nodes = list(leaves)
+    while len(nodes) > 1:
+        if len(nodes) % 2 == 1:
+            nodes.append(nodes[-1])  # duplicate last leaf
+        nodes = [
+            hashlib.sha256((nodes[i] + nodes[i + 1]).encode()).hexdigest()
+            for i in range(0, len(nodes), 2)
+        ]
+    return nodes[0]
+
+
 class AuditLedger:
     """
     In-memory ledger (swap the _storage list for a DB-backed version in prod).
@@ -43,7 +60,7 @@ class AuditLedger:
     Prod usage: replace _append_to_storage / _last_hash with async Postgres calls.
     """
 
-    def __init__(self, signing_key: Optional[Ed25519PrivateKey] = None) -> None:
+    def __init__(self, signing_key: Ed25519PrivateKey | None = None) -> None:
         self._signing_key = signing_key or Ed25519PrivateKey.generate()
         self._storage: list[dict[str, Any]] = []
 
@@ -62,7 +79,7 @@ class AuditLedger:
         """
         prev_hash = self._last_hash()
         payload_hash = _sha256(_canonical(payload))
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = datetime.now(UTC).isoformat()
 
         unsigned_row = {
             "prev_hash": prev_hash,
@@ -93,6 +110,29 @@ class AuditLedger:
             unsigned = {k: v for k, v in row.items() if k != "signature"}
             expected_prev = _sha256(_canonical(unsigned))
         return True
+
+    def merkle_root(self) -> str:
+        """
+        Compute the Merkle root over all row hashes.
+
+        Each leaf is the SHA-256 of the row's unsigned canonical form.
+        Odd-length layers duplicate the last node (standard Bitcoin-style padding).
+        An empty ledger returns the genesis hash.
+        """
+        if not self._storage:
+            return GENESIS_HASH
+        leaves = [
+            _sha256(_canonical({k: v for k, v in row.items() if k != "signature"}))
+            for row in self._storage
+        ]
+        return _build_merkle_root(leaves)
+
+    def verify_merkle(self, expected_root: str) -> bool:
+        """
+        Re-compute the Merkle root and compare it against *expected_root*.
+        Returns True if they match.
+        """
+        return self.merkle_root() == expected_root
 
     def to_list(self) -> list[dict[str, Any]]:
         return list(self._storage)

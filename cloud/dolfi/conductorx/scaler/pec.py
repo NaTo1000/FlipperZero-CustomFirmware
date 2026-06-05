@@ -7,9 +7,12 @@ Monitors:
   - CPU/memory utilization
 
 Prediction:
-  - Exponential moving average (EMA) of connection velocity
-  - If predicted load exceeds 80% of current capacity → scale up
-  - If predicted load drops below 20% for 5 consecutive windows → scale down
+  - Double Exponential Moving Average (DEMA) of connection velocity.
+    DEMA eliminates the lag inherent in single EMA by subtracting the
+    squared EMA trend:  DEMA = 2 * EMA1 - EMA2
+  - If predicted load exceeds SCALE_UP_THRESHOLD → scale up
+  - If predicted load drops below SCALE_DOWN_THRESHOLD for
+    SCALE_DOWN_WINDOW consecutive windows → scale down
 
 Actions:
   - Docker Swarm: `docker service scale chaimera-api=N`
@@ -20,10 +23,8 @@ from __future__ import annotations
 
 import asyncio
 import math
-import subprocess
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Optional
+from dataclasses import dataclass
+from datetime import UTC, datetime
 
 
 @dataclass
@@ -56,7 +57,17 @@ class ScaleDecision:
 
 class PECScaler:
     """
-    Predictive auto-scaler with EMA-based load forecasting.
+    Predictive auto-scaler with DEMA-based load forecasting.
+
+    Double Exponential Moving Average (DEMA) provides faster response to load
+    changes than single EMA by subtracting the lagged EMA-of-EMA component:
+
+        EMA1_n = α * load + (1 − α) * EMA1_{n-1}
+        EMA2_n = α * EMA1_n + (1 − α) * EMA2_{n-1}
+        DEMA_n = 2 * EMA1_n − EMA2_n
+
+    This cancels the first-order lag, reducing reaction time to load spikes by
+    approximately 1/(2α) windows compared to single EMA.
 
     Usage::
 
@@ -64,7 +75,7 @@ class PECScaler:
         await scaler.run_loop(interval_seconds=30)
     """
 
-    EMA_ALPHA = 0.3          # EMA smoothing factor
+    EMA_ALPHA = 0.3          # smoothing factor for both EMA passes
     SCALE_UP_THRESHOLD = 0.75
     SCALE_DOWN_THRESHOLD = 0.20
     SCALE_DOWN_WINDOW = 5    # consecutive windows below threshold before scale-down
@@ -81,7 +92,9 @@ class PECScaler:
         self._max = max_replicas
         self._backend = backend
         self._current_replicas = min_replicas
-        self._ema: float = 0.0
+        # DEMA requires two EMA accumulators
+        self._ema1: float = 0.0   # first-pass EMA
+        self._ema2: float = 0.0   # EMA of EMA1
         self._below_threshold_count: int = 0
         self._history: list[ScaleDecision] = []
 
@@ -104,9 +117,10 @@ class PECScaler:
     # ------------------------------------------------------------------
 
     def _decide(self, sample: LoadSample) -> ScaleDecision:
-        # Update EMA
-        self._ema = self.EMA_ALPHA * sample.load_score + (1 - self.EMA_ALPHA) * self._ema
-        predicted = self._ema
+        # Update DEMA: two passes of EMA then subtract lag
+        self._ema1 = self.EMA_ALPHA * sample.load_score + (1 - self.EMA_ALPHA) * self._ema1
+        self._ema2 = self.EMA_ALPHA * self._ema1 + (1 - self.EMA_ALPHA) * self._ema2
+        predicted = max(0.0, min(1.0, 2 * self._ema1 - self._ema2))
 
         if predicted >= self.SCALE_UP_THRESHOLD:
             self._below_threshold_count = 0
@@ -190,7 +204,7 @@ class PECScaler:
         """In production: query Prometheus/Redis/psutil."""
         import random
         return LoadSample(
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             connections=random.randint(0, 50),
             queue_depth=random.randint(0, 30),
             cpu_pct=random.uniform(0, 100),
@@ -199,3 +213,8 @@ class PECScaler:
 
     def history(self) -> list[ScaleDecision]:
         return list(self._history)
+
+    @property
+    def dema(self) -> float:
+        """Current DEMA predicted load score (0–1)."""
+        return max(0.0, min(1.0, 2 * self._ema1 - self._ema2))
