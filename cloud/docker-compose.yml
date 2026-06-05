@@ -1,0 +1,152 @@
+version: "3.9"
+
+services:
+  # ---------------------------------------------------------------------------
+  # ConductorX API
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: chaimera-api
+    environment:
+      DOLFI_ENV: dev
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: dolfi
+      POSTGRES_PASSWORD: dolfi_dev
+      POSTGRES_DB: dolfi
+      POSTGRES_CODE_HOST: postgres-code
+      POSTGRES_CODE_PORT: "5432"
+      POSTGRES_CODE_USER: dolfi_code
+      POSTGRES_CODE_PASSWORD: dolfi_code_dev
+      POSTGRES_CODE_DB: dolfi_code
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: "6333"
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: dolfi-dev-root-token
+      CORS_ORIGINS: "http://localhost:5173,http://localhost:3000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - postgres-code
+      - redis
+      - qdrant
+      - vault
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — primary data
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: dolfi-postgres
+    environment:
+      POSTGRES_USER: dolfi
+      POSTGRES_PASSWORD: dolfi_dev
+      POSTGRES_DB: dolfi
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — code / source file DB (network-isolated)
+  # ---------------------------------------------------------------------------
+  postgres-code:
+    image: postgres:16-alpine
+    container_name: dolfi-postgres-code
+    environment:
+      POSTGRES_USER: dolfi_code
+      POSTGRES_PASSWORD: dolfi_code_dev
+      POSTGRES_DB: dolfi_code
+    volumes:
+      - postgres_code_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Redis — cache + message queue
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: dolfi-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # ---------------------------------------------------------------------------
+  # Qdrant — vector store (RAG)
+  # ---------------------------------------------------------------------------
+  qdrant:
+    image: qdrant/qdrant:v1.9.2
+    container_name: dolfi-qdrant
+    volumes:
+      - qdrant_data:/qdrant/storage
+    ports:
+      - "6333:6333"
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # HashiCorp Vault — secrets store
+  # ---------------------------------------------------------------------------
+  vault:
+    image: hashicorp/vault:1.16
+    container_name: dolfi-vault
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: dolfi-dev-root-token
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+    command: server -dev
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # noVNC — remote Flipper access
+  # ---------------------------------------------------------------------------
+  vnc:
+    build:
+      context: ./dolfi/conductorx/vnc
+      dockerfile: Dockerfile
+    container_name: dolfi-vnc
+    ports:
+      - "5901:5901"
+      - "6080:6080"
+    devices:
+      - "/dev/bus/usb:/dev/bus/usb"
+    privileged: true
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Frontend (SvelteKit dev server)
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
+    container_name: dolfi-frontend
+    environment:
+      PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  postgres_code_data:
+  qdrant_data:
